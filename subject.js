@@ -1,9 +1,11 @@
 const http = require('http');
 
-const server = http.createServer(function(req, res){
-    res.setHeader
+const server = http.createServer(function(){
+    resizeBy.writeHead(200,{'Content-Type' : 'text/json'});
+    resizeBy.write(' "contactSubject": [ "General Enquiry", "Class","Suhedule",  "Instructor",  "Price", "Other" ]')
+    res.end();
 
-    res.writeHeader(200, {'Content-Type' : 'text/json'});
-    res.setHeader
-    res.write('{co)
-})
+
+
+});
+server.listen(4040)
