@@ -1518,62 +1518,71 @@
 
       </form>
     </div>
-    <div role="tabpanel" class="tab-pane" id="register">
-      <form method="post" data-aos="fade">
-        <div class="form-group row">
-          <div class="col-md-6 mb-3 mb-lg-0">
-            <input type="text" class="form-control" placeholder="First name">
-          </div>
-          <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Last name">
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-md-12">
-            <input type="text" class="form-control" placeholder="Occupation">
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-md-12">
-            <input type="email" class="form-control" placeholder="Email">
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-md-6">
-
-            <input type="submit" class="btn btn-primary py-3 px-5 btn-block" value="Register">
-          </div>
-        </div>
-
-      </form>
+    
+     <!-- Register Tab -->
+<div role="tabpanel" class="tab-pane" id="register">
+  <form id="register-form" method="post" data-aos="fade">
+    <div class="form-group row">
+      <div class="col-md-6 mb-3 mb-lg-0">
+        <input type="text" id="register-fname" class="form-control" placeholder="First name" required>
+      </div>
+      <div class="col-md-6">
+        <input type="text" id="register-lname" class="form-control" placeholder="Last name" required>
+      </div>
     </div>
-    <div role="tabpanel" class="tab-pane" id="sign-in">
-      <form method="post" data-aos="fade">
-
-        <div class="form-group row">
-          <div class="col-md-12">
-            <input type="text" class="form-control" placeholder="Username">
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-md-12">
-            <input type="password" class="form-control" placeholder="Password">
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-md-6">
-
-            <input type="submit" class="btn btn-primary py-3 px-5 btn-block" value="Login">
-          </div>
-        </div>
-
-      </form>
+    <div class="form-group row">
+      <div class="col-md-12">
+        <select id="register-occupation-category" class="form-control" required>
+          <option value="">Select Occupation Category</option>
+        </select>
+      </div>
     </div>
+    <div class="form-group row">
+      <div class="col-md-12">
+        <select id="register-occupation" class="form-control" required>
+          <option value="">Select Occupation</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12">
+        <input type="email" id="register-email" class="form-control" placeholder="Email" required>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12">
+        <input type="password" id="register-password" class="form-control" placeholder="Password" required>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary py-3 px-5 btn-block">Register</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+    <!-- Sign-in Tab -->
+<div role="tabpanel" class="tab-pane" id="sign-in">
+  <form id="login-form" method="post" data-aos="fade">
+    <div class="form-group row">
+      <div class="col-md-12">
+        <input type="text" id="login-username" class="form-control" placeholder="Username/Email" required>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-12">
+        <input type="password" id="login-password" class="form-control" placeholder="Password" required>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary py-3 px-5 btn-block">Login</button>
+      </div>
+    </div>
+  </form>
+</div>
+
   </div>
 
 </div>
@@ -1824,6 +1833,81 @@
 
       console.log(response);  
     }
+    document.addEventListener('DOMContentLoaded', () => {
+  // 1. Load occupation categories
+  const categorySelect = document.getElementById('register-occupation-category');
+  const occupationSelect = document.getElementById('register-occupation');
+  
+  async function loadCategories() {
+    const res = await fetch('./json/occupation-cat.json');
+    const data = await res.json();
+    categorySelect.innerHTML = '<option value="">Select Occupation Category</option>';
+    data.categories.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      categorySelect.appendChild(option);
+    });
+  }
+  loadCategories();
+
+  // 2. Load occupations based on category
+  categorySelect.addEventListener('change', async function() {
+    const cat = this.value.toLowerCase();
+    occupationSelect.innerHTML = '<option value="">Select Occupation</option>';
+    if (!cat) return;
+    const res = await fetch(`./json/${cat}.json`);
+    const data = await res.json();
+    data.occupations.forEach(occ => {
+      const option = document.createElement('option');
+      option.value = occ;
+      option.textContent = occ;
+      occupationSelect.appendChild(option);
+    });
+  });
+
+  // 3. Handle register
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fname = document.getElementById('register-fname').value.trim();
+    const lname = document.getElementById('register-lname').value.trim();
+    const category = categorySelect.value;
+    const occupation = occupationSelect.value;
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+
+    if (!fname || !lname || !category || !occupation || !email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const res = await fetch('http://localhost:4000/api/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({fname, lname, category, occupation, email, password})
+    });
+    const data = await res.json();
+    alert(data.message);
+  });
+
+  // 4. Handle login
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) {
+      alert("Please fill in both fields.");
+      return;
+    }
+    const res = await fetch('http://localhost:4000/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    alert(data.message);
+  });
+});
 
 
   </script>
